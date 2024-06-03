@@ -1,49 +1,6 @@
-
-#creating a new driver
-# stay_alive = webdriver.ChromeOptions()
-# stay_alive.add_experimental_option("detach", True)
-
-# drive = webdriver.Chrome(options=stay_alive)
-
-# drive.get("https://survey.stackoverflow.co/2023/#most-popular-technologies-office-stack-async")
-# popular_DB = drive.find_element((By.XPATH, '//*[@id="office-stack-async7gn0x"]/tbody/tr[1]/td[1]'))
-#
-# print(f"the most popular: {popular_DB}")
-
-
-#locators in selenium
-
-# drive.get("https://www.python.org/")
-# times = drive.find_element(By.CSS_SELECTOR,"say-no-more")
-# names = drive.find_element((By.CLASS_NAME, "event-widget li a"))
-#
-# events = {}
-#
-# for n in range(len(times)):
-#     events[n] = {
-#         "time" : times[n].text,
-#         "name" : names[n].text,
-#     }
-# print(events)
-
-# drive.get("https://en.wikipedia.org/wiki/Main_Page")
-#
-# # article_count = drive.find_element(By.CSS_SELECTOR, "#articlecount a")
-# # print(article_count.text)
-#
-# click_links = drive.find_element(By.LINK_TEXT, "Content portals")
-#
-# search = drive.find_element(By.NAME, "search")
-# time.sleep(1)
-# search.send_keys("Machine Learning", Keys.ENTER)
-
-
-#------------------------------------------------------------------------------------------------
-
-#tinder auto swapping bot
-
 from time import sleep
 from selenium import webdriver
+from selenium.common import ElementClickInterceptedException , NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -96,39 +53,75 @@ tinder_login.click()
 # Wait for the login options to appear
 sleep(5)
 
-# Locate the iframe
-iframe = WebDriverWait(driver, 10).until(
-    EC.presence_of_element_located((By.XPATH, '//iframe[@title="Google බොත්තම සමගින් පුරන්න"]'))
-)
-
-# Switch to the iframe
-driver.switch_to.frame(iframe)
-
-# Wait for the Google login button to be present and clickable
-google_login = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.XPATH, '//div[@role="button" and @aria-labelledby="button-label"]'))
-)
-google_login.click()
+sleep(2)
+fb_login = driver.find_element(By.XPATH, value='//*[@id="c-404727370"]/div/div/div/div[1]/div/div/div[2]/div[2]/span/div[2]/button')
+fb_login.click()
 
 # Wait for the new window to appear
-sleep(5)
+sleep(2)
 
 # Switch to the new window
 driver.switch_to.window(driver.window_handles[-1])
 
-
 # Now perform the login using Gmail credentials
-email_field = driver.find_element(By.XPATH, '//*[@id="identifierId"]')
+email_field = driver.find_element(By.XPATH, '//*[@id="email"]')
 email_field.send_keys(GMAIL_ID)
-email_field.send_keys(Keys.ENTER)
+
 
 # Wait for the next page to load
-sleep(10)
+sleep(5)
 
-password_field = driver.find_element(By.XPATH, '//*[@name="password"]')
+password_field = driver.find_element(By.XPATH, '//*[@id="pass"]')
 password_field.send_keys(GOOGLE_PWD)
+
+sleep(5)
+
 password_field.send_keys(Keys.ENTER)
 
-# Add any additional steps if required after login
+
+sleep(10)
+#Allow location
+allow_location_button = WebDriverWait(driver, 20).until(
+    EC.element_to_be_clickable((By.XPATH, 'button[data-testid="allow"]'))
+)
+allow_location_button.click()
+sleep(3)
+
+
+notifications_button = driver.find_element(By.XPATH, value='//*[@id="c-404727370"]/div/div/div/div/div[3]/button[1]')
+notifications_button.click()
+
+cookies = driver.find_element(By.XPATH, value='//*[@id="content"]/div/div[2]/div/div/div[1]/button')
+cookies.click()
+sleep(3)
+for n in range(100):
+
+    # Add a 2-second delay between likes.
+    sleep(2)
+
+    try:
+        print("Clicking the Like button...")
+        heart_icon = driver.find_element(By.XPATH, value="//*[@id='t2067052097']/div/div[1]/div/main/div[1]/div/div/div[1]/div[1]/div/div[3]/div/div[4]/button")
+        heart_icon.click()
+
+    # For "It's a match" pop-up!
+    except ElementClickInterceptedException:
+        try:
+            match_popup = driver.find_element(By.CSS_SELECTOR, value=".itsAMatch a")
+            match_popup.click()
+        # For "Tinder Gold" pop-up
+        except NoSuchElementException:
+            close_tinder_gold = driver.find_element(By.XPATH, value="//*[@id='t338671021']/div/div[2]/div[2]/button")
+            close_tinder_gold.click()
+
+    # If the Like button changes XPath after the first Like
+    except NoSuchElementException:
+        try:
+            heart_icon = driver.find_element(By.XPATH, value="//*[@id='t2067052097']/div/div[1]/div/main/div[1]/div/div/div[1]/div[1]/div/div[4]/div/div[4]/button")
+            heart_icon.click()
+        # For "Add Tinder to your Home Screen" pop-up
+        except ElementClickInterceptedException:
+            not_interested_button = driver.find_element(By.XPATH, value="//*[@id='t338671021']/div/div/div[2]/button[2]/div[2]/div[2]/div")
+            not_interested_button.click()
 
 driver.quit()
